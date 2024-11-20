@@ -7,8 +7,19 @@ const tours = JSON.parse(
 exports.checkId = (req, res, next, val) => {
   if (!tours.find(el => el.id === val * 1)) {
     return res.status(404).json({
-      status: 'fail',
+      status: 'failed',
       message: 'Invalid id!'
+    });
+  }
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  const reqbod = req.body;
+  if (!('name' in reqbod) || !('price' in reqbod)) {
+    return res.status(400).json({
+      status: 'failed',
+      message: 'Missing name or price!'
     });
   }
   next();
@@ -30,7 +41,7 @@ exports.getAllTours = (req, res) => {
 exports.getTour = (req, res) => {
   const id = req.params.id * 1;
   const tour = tours.find(el => el.id === id);
-  // console.log(req.params);
+  console.log(req.params);
   res.status(200).json({
     status: 'success',
     data: {
