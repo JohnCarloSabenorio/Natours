@@ -2,7 +2,17 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 const tourSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      maxlength: [
+        40,
+        'The tour name must have less or equal than 40 characters.'
+      ],
+      minlength: [5, 'the tour name must have more or equal than 5 characters.']
+    },
     slug: {
       type: String
     },
@@ -18,10 +28,18 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      required: [true, 'Difficulty of the tour is required!']
+      default: "Average",
+      required: [true, 'Difficulty of the tour is required!'],
+      enum: {
+        values: ['Easy', 'Average', 'Difficult'],
+        message: 'Difficulty must be set to: Easy, Average, or Difficult.'
+      }
     },
     ratingsAverage: {
-      type: Number
+      type: Number,
+      default: 1.0,
+      min: [1, 'Average rating must be 1 or above.'],
+      max: [5, 'Average rating must be below 5']
     },
     ratingsQuantity: {
       type: Number,
@@ -89,8 +107,18 @@ tourSchema.pre(/^find/, function(next) {
 });
 
 tourSchema.post(/^find/, function(docs, next) {
-  console.log(`Find query took ${Date.now() - this.start} milliseconds to complete!`);
-  console.log("Documents Found: ", docs);
+  console.log(
+    `Find query took ${Date.now() - this.start} milliseconds to complete!`
+  );
+  console.log('Documents Found: ', docs);
+  next();
+});
+
+// AGGREGATE MIDDLEWARE
+
+tourSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
   next();
 });
 
