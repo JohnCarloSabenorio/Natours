@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -11,7 +13,14 @@ const tourSchema = new mongoose.Schema(
         40,
         'The tour name must have less or equal than 40 characters.'
       ],
-      minlength: [5, 'the tour name must have more or equal than 5 characters.']
+      minlength: [
+        5,
+        'the tour name must have more or equal than 5 characters.'
+      ],
+      validate: [
+        validator.isAlpha,
+        'The tour name must only contain characters from the alphabet!'
+      ]
     },
     slug: {
       type: String
@@ -28,7 +37,7 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      default: "Average",
+      default: 'Average',
       required: [true, 'Difficulty of the tour is required!'],
       enum: {
         values: ['Easy', 'Average', 'Difficult'],
@@ -45,7 +54,16 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function(val) {
+          return this.price > val; // This only points to the document on NEW document creation; it will not work on updating
+        },
+        message:
+          'The discounted price ({VALUE}) must be less than the original price!'
+      }
+    },
     summary: {
       type: String,
       trim: true,
