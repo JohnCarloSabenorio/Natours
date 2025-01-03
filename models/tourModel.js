@@ -18,7 +18,7 @@ const tourSchema = new mongoose.Schema(
         'the tour name must have more or equal than 5 characters.'
       ],
       validate: [
-        validator.isAlpha,
+        validator.isAscii,
         'The tour name must only contain characters from the alphabet!'
       ]
     },
@@ -48,7 +48,7 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 1.0,
       min: [1, 'Average rating must be 1 or above.'],
-      max: [5, 'Average rating must be below 5']
+      max: [5, 'Average rating must be below 5.']
     },
     ratingsQuantity: {
       type: Number,
