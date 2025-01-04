@@ -30,18 +30,21 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please provide a  password!'],
-    minlength: 8
+    minlength: 8,
+    select: false
   },
   passwordConfirm: {
     type: String,
     required: [true, 'Please confirm your password!'],
+    select: false,
     validate: {
       validator: function(el) {
         return el === this.password;
       },
       message: 'Your passwords do not match!'
     }
-  }
+  },
+  passwordChangedAt: Date
 });
 
 // ADD ENCRYPTION
@@ -52,8 +55,23 @@ userSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, 12);
   // Deletes password confirm field
   this.passwordConfirm = undefined;
+  this.passwordChangedAt = Date.now();
   next();
 });
+
+// INSTANCE METHODS
+userSchema.methods.correctPassword = async function(
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.passwordChangedAfter =  function(JWTDateIssued) {
+  if (!this.passwordChangedAt) return false; // Password has never been changed
+  const changedPwordTimeStamp = this.passwordChangedAt.getTime() / 1000;  
+  return changedPwordTimeStamp > JWTDateIssued;
+};
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;
