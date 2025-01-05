@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { token } = require('morgan');
 // CREATE USER SCHEMA WITH THE FOLLOWING FIELDS:
 /* 
 1. name
@@ -23,6 +25,16 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please tell us your email'],
     validate: [validator.isEmail, 'Please provide a valid email']
   },
+
+  role: {
+    type: String,
+    enum: {
+      values: ['user', 'guide', 'lead-guide', 'admin'],
+      message:
+        '{VALUE} is not a valid role. The allowed roles are: user, guide, lead-guide, and admin.'
+    },
+    default: 'user'
+  },
   photo: {
     type: String,
     trim: true
@@ -44,6 +56,8 @@ const userSchema = new mongoose.Schema({
       message: 'Your passwords do not match!'
     }
   },
+  passwordResetToken: String,
+  tokenExpirationDate: Date,
   passwordChangedAt: Date
 });
 
@@ -51,11 +65,17 @@ const userSchema = new mongoose.Schema({
 
 // Will only run if password is modified
 userSchema.pre('save', async function(next) {
-  if (!this.isModified) return;
+  if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   // Deletes password confirm field
   this.passwordConfirm = undefined;
   this.passwordChangedAt = Date.now();
+  next();
+});
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password' || this.isNew)) return next();
+  this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
@@ -67,10 +87,31 @@ userSchema.methods.correctPassword = async function(
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-userSchema.methods.passwordChangedAfter =  function(JWTDateIssued) {
+userSchema.methods.passwordChangedAfter = function(JWTDateIssued) {
   if (!this.passwordChangedAt) return false; // Password has never been changed
-  const changedPwordTimeStamp = this.passwordChangedAt.getTime() / 1000;  
+  const changedPwordTimeStamp = this.passwordChangedAt.getTime() / 1000;
   return changedPwordTimeStamp > JWTDateIssued;
+};
+
+// create password reset token function
+/* 
+1. create random 32 bytes of a random string 
+2. hash the passwordresettoken and store it in the document
+3. set the expiration date of the token in 10 mins
+4. return the unencrypted token
+*/
+userSchema.methods.createPasswordResetToken = function() {
+  console.log('Creating password reset token');
+  const resetToken = crypto.randomBytes(64).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.tokenExpirationDate = Date.now() + 10 * 60 * 1000;
+  console.log(resetToken, this.passwordResetToken);
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
