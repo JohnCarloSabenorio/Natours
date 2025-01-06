@@ -58,24 +58,35 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   tokenExpirationDate: Date,
-  passwordChangedAt: Date
+  passwordChangedAt: Date,
+
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 // ADD ENCRYPTION
 
-// Will only run if password is modified
+// DOCUMENT MIDDLEWARE
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   // Deletes password confirm field
   this.passwordConfirm = undefined;
-  this.passwordChangedAt = Date.now();
   next();
 });
 
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password' || this.isNew)) return next();
+  if (!this.isModified('password') || this.isNew) return next();
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+// QUERY MIDDLEWARE
+userSchema.pre(/^find/, async function(next) {
+  this.find({ active: { $ne: false } });
   next();
 });
 

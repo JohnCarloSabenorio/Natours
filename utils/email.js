@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 
-
 const sendEmail = async options => {
   // 1. Create transporter
   const transporter = nodemailer.createTransport({
@@ -12,10 +11,6 @@ const sendEmail = async options => {
     }
   });
 
-  console.log(process.env.EMAIL_HOST);
-  console.log(process.env.EMAIL_PORT);
-  console.log(process.env.EMAIL_USERNAME);
-  console.log(process.env.EMAIL_PASSWORD);
   // 2. Define email options
   const mailOptions = {
     from: 'Testing USER <user@example.com>',
