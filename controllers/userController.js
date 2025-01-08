@@ -1,8 +1,8 @@
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-// FOR THE USER
 
+// FOR THE USER
 const filterObj = (obj, ...filter) => {
   const filtered = {};
   Object.keys(obj).forEach(el => {
@@ -83,3 +83,5 @@ exports.deleteUser = (req, res) => {
     message: 'This route is not yet defined!'
   });
 };
+
+

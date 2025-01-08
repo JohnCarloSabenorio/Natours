@@ -16,6 +16,19 @@ const signToken = id => {
 const createSignToken = (user, statusCode, res) => {
   const token = signToken(user.id);
 
+  // Create options for the cookie: expiration date, httpOnly
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  };
+  // If environment is in production, set secure to true
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  // Create cookie
+  res.cookie('jwt', token, cookieOptions);
+
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -99,6 +112,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  console.log('THIS IS THE CURRENT USER: ', req.user);
   next();
 });
 
@@ -215,3 +229,16 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4. Keep the user logged in!
   createSignToken(user, 200, res);
 });
+
+// IN THE FUTURE TRY TO IMPLEMENT THESE FOLLOWING FEATURES:
+/* 
+1. IMPLEMENT MAXIMUM LOGIN ATTEMPTS FEATURE
+2. PREVENT CSRF
+3. REQUIRE RE-AUTHENTICATION BEFORE A HIGH-VALUE ACTION
+4. BLACKLIST OF UNTRUSTED TOKENS
+5. CONFIRM USER EMAIL ADDRESS
+6. REFRESH TOKENS
+7. IMPLEMENT TWO-FACTOR AUTHENTICATION
+
+*/
+// lEARN NOSQL Query injection
