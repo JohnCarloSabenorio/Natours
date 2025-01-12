@@ -9,6 +9,7 @@ const AppError = require('./utils/appError');
 // DEFINE ROUTERS
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
@@ -42,14 +43,14 @@ app.use(
 app.use(mongoSanitize());
 
 // Data sanitization against XSS (Kinda also handles nosql query injection as it converts the query to js object)
-app.use((req, res, next) => {
-  filteredBody = {};
-  Object.keys(req.body).forEach(input => {
-    filteredBody[input] = xssFilters.inHTMLData(req.body[input]);
-  });
-  req.body = filteredBody;
-  next();
-});
+// app.use((req, res, next) => {
+//   filteredBody = {};
+//   Object.keys(req.body).forEach(input => {
+//     filteredBody[input] = xssFilters.inHTMLData(req.body[input]);
+//   });
+//   req.body = filteredBody;
+//   next();
+// });
 
 // Prevents parameter pollution
 app.use(
@@ -68,11 +69,13 @@ app.use(
 // Body parser (form data to req.body)
 app.use(express.urlencoded({ extended: true }));
 
+// Sample middleware
 app.use((req, res, next) => {
   console.log('Hello from the middleware 👋');
   next();
 });
 
+// Request Time
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -83,6 +86,7 @@ app.use(express.static(`${__dirname}/public`));
 // ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   // Immediately assumes that there is an error, and will skip all middleware and send it directly to global error handling middleware
