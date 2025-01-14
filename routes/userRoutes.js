@@ -10,17 +10,18 @@ router.route('/signup').post(authController.signup);
 router.route('/login').post(authController.login);
 router.route('/forgotPassword').post(authController.forgotPassword);
 router.route('/resetPassword/:token').patch(authController.resetPassword);
-router
-  .route('/updateMyPassword')
-  .patch(authController.protect, authController.updatePassword);
-router
-  .route('/updateMe')
-  .patch(authController.protect, userController.updateMe);
 
-router
-  .route('/deleteMe')
-  .delete(authController.protect, userController.deleteMe);
+// All routes after this middleware needs authentication to be accessed
+router.use(authController.protect);
 
+router.route('/updateMyPassword').patch(authController.updatePassword);
+
+router.route('/me').get(userController.getMe, userController.getUser);
+router.route('/updateMe').patch(userController.updateMe);
+router.route('/deleteMe').delete(userController.deleteMe);
+
+// All routes after this middleware is only for the admin
+router.use(authController.restrictTo('admin'));
 router
   .route('/')
   .get(userController.getAllUsers)
