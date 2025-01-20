@@ -46,13 +46,14 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 1.0,
+      default: 4.5,
       min: [1, 'Average rating must be 1 or above.'],
-      max: [5, 'Average rating must be below 5.']
+      max: [5, 'Average rating must be below 5.'],
+      set: val => (Math.round(val) * 10) / 10
     },
     ratingsQuantity: {
       type: Number,
-      default: 4.5
+      default: 0
     },
     priceDiscount: {
       type: Number,
@@ -88,12 +89,15 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     startLocation: {
+      // GeoJSON
       type: {
         type: String,
         default: 'Point',
         enum: ['Point']
       },
-      coordinates: [Number]
+      coordinates: [Number],
+      address: String,
+      description: String
     },
     locations: [
       {
@@ -121,6 +125,12 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
+
+// ADD INDEX HERE
+tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 tourSchema.virtual('durationWeeks').get(function() {
   return this.duration / 7;
@@ -185,12 +195,15 @@ tourSchema.post(/^find/, function(docs, next) {
 
 // AGGREGATE MIDDLEWARE
 
-tourSchema.pre('aggregate', function(next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this.pipeline());
-  next();
-});
+// tourSchema.pre('aggregate', function(next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   console.log(this.pipeline());
+//   next();
+// });
 
 let Tour = mongoose.model('Tour', tourSchema);
 
+Tour.on('index', function(err) {
+  console.log(err);
+});
 module.exports = Tour;

@@ -3,6 +3,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { token } = require('morgan');
+
 // CREATE USER SCHEMA WITH THE FOLLOWING FIELDS:
 /* 
 1. name
