@@ -71,19 +71,19 @@ const userSchema = new mongoose.Schema({
 // ADD ENCRYPTION
 
 // DOCUMENT MIDDLEWARE
-// userSchema.pre('save', async function(next) {
-//   if (!this.isModified('password')) return next();
-//   this.password = await bcrypt.hash(this.password, 12);
-//   // Deletes password confirm field
-//   this.passwordConfirm = undefined;
-//   next();
-// });
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  // Deletes password confirm field
+  this.passwordConfirm = undefined;
+  next();
+});
 
-// userSchema.pre('save', async function(next) {
-//   if (!this.isModified('password') || this.isNew) return next();
-//   this.passwordChangedAt = Date.now() - 1000;
-//   next();
-// });
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password') || this.isNew) return next();
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
 
 // QUERY MIDDLEWARE
 userSchema.pre(/^find/, async function(next) {

@@ -89,7 +89,6 @@ reviewSchema.post(/^findOneAnd/, async function(doc) {
 
 const review = mongoose.model('Review', reviewSchema);
 
-// review.on('index', function(err) {
-//   console.log(err);
-// });
+
+
 module.exports = review;
