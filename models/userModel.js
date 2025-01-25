@@ -48,14 +48,14 @@ const userSchema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Please confirm your password!'],
+    // required: [true, 'Please confirm your password!'],
     select: false,
-    validate: {
-      validator: function(el) {
-        return el === this.password;
-      },
-      message: 'Your passwords do not match!'
-    }
+    // validate: {
+    //   validator: function(el) {
+    //     return el === this.password;
+    //   },
+    //   message: 'Your passwords do not match!'
+    // }
   },
   passwordResetToken: String,
   tokenExpirationDate: Date,
@@ -71,19 +71,19 @@ const userSchema = new mongoose.Schema({
 // ADD ENCRYPTION
 
 // DOCUMENT MIDDLEWARE
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  // Deletes password confirm field
-  this.passwordConfirm = undefined;
-  next();
-});
+// userSchema.pre('save', async function(next) {
+//   if (!this.isModified('password')) return next();
+//   this.password = await bcrypt.hash(this.password, 12);
+//   // Deletes password confirm field
+//   this.passwordConfirm = undefined;
+//   next();
+// });
 
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password') || this.isNew) return next();
-  this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
+// userSchema.pre('save', async function(next) {
+//   if (!this.isModified('password') || this.isNew) return next();
+//   this.passwordChangedAt = Date.now() - 1000;
+//   next();
+// });
 
 // QUERY MIDDLEWARE
 userSchema.pre(/^find/, async function(next) {
