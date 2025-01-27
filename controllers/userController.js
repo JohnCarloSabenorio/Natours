@@ -7,7 +7,10 @@ const factory = require('./handlerFactory.js');
 const filterObj = (obj, ...filter) => {
   const filtered = {};
   Object.keys(obj).forEach(el => {
-    if (filter.includes(el)) filter[el] = obj[el];
+    console.log('THE EL:', el);
+    console.log(filter.includes(el));
+
+    if (filter.includes(el)) filtered[el] = obj[el];
   });
 
   return filtered;
@@ -24,10 +27,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       new AppError('The form contains your password, please try again!', 400)
     );
 
-  // Update the user
   const user = await User.findByIdAndUpdate(
     req.user.id,
-    filterObj(req.body, 'user', 'email'),
+    filterObj(req.body, 'name', 'email'),
     {
       new: true,
       runValidators: true

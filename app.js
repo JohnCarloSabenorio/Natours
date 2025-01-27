@@ -4,8 +4,9 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
-const xssFilters = require('xss-filters');
+// const xssFilters = require('xss-filters');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 const AppError = require('./utils/appError');
 // DEFINE ROUTERS
 const tourRouter = require('./routes/tourRoutes');
@@ -22,7 +23,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Set security HTTP headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 
 if (process.env.NODE_ENV === 'development') {
   // Development logging
@@ -39,11 +44,14 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Body parser (reading data from body to req.body)
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(
   express.json({
     limit: '10kb'
   })
 );
+
+app.use(cookieParser());
 
 // Data sanitization against NoSQL Query injection
 app.use(mongoSanitize());
@@ -73,11 +81,11 @@ app.use(
 );
 
 // Body parser (form data to req.body)
-app.use(express.urlencoded({ extended: true }));
 
 // Sample middleware
 app.use((req, res, next) => {
   console.log('Hello from the middleware 👋');
+  console.log(req.cookies);
   next();
 });
 
@@ -87,15 +95,12 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
 /* 
 1. Create view router
 2. Implement router in app file
 3. Move the view routes in the route file
 4. Create route controller for the view route handlers
 */
-
 
 // API ROUTES
 

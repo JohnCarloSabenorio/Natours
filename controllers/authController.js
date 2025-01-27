@@ -53,7 +53,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   // 1.) Check if password and email exists.
   const { password, email } = req.body;
-
+  console.log(req.body);
   if (!password || !email) {
     return next(new AppError('Please provide your email and password!', 400));
   }
@@ -71,6 +71,16 @@ exports.login = catchAsync(async (req, res, next) => {
   createSignToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+
+  res.status(200).json({
+    status: 'success'
+  });
+};
 exports.protect = catchAsync(async (req, res, next) => {
   // 1. Get token and check if it exists
   let token;
@@ -81,13 +91,12 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     // authorization === Bearer + " " + token
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
-  
   if (!token) {
-    return next(
-      new AppError('Your token does not exist. Please try again.', 401)
-    );
+    return next(new AppError('You are not logged in! Please try again.', 401));
   }
 
   // 2. Verify token
@@ -113,9 +122,41 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  res.locals.user = currentUser;
   console.log('THIS IS THE CURRENT USER: ', req.user);
   next();
 });
+exports.isLoggedIn = async (req, res, next) => {
+  // Verify token
+  if (req.cookies.jwt) {
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+      console.log(decoded);
+      const currentUser = await User.findById(decoded.id);
+
+      // Check if the user still exists
+      if (!currentUser) {
+        return next();
+      }
+
+      // Check if the user changed his/her password
+      if (currentUser.passwordChangedAfter(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      // req.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  return next();
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
