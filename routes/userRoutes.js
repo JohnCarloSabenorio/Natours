@@ -1,6 +1,8 @@
 const express = require('express');
 const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authController');
+
+// Using multer() without any options will store in image in memory
 const router = express.Router();
 
 // ROUTES
@@ -18,7 +20,14 @@ router.use(authController.protect);
 router.route('/updateMyPassword').patch(authController.updatePassword);
 
 router.route('/me').get(userController.getMe, userController.getUser);
-router.route('/updateMe').patch(userController.updateMe);
+
+router
+  .route('/updateMe')
+  .patch(
+    userController.uploadUserPhoto,
+    userController.resizeUserPhoto,
+    userController.updateMe
+  );
 router.route('/deleteMe').delete(userController.deleteMe);
 
 // All routes after this middleware is only for the admin

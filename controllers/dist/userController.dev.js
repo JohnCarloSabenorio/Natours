@@ -6,7 +6,47 @@ var catchAsync = require('./../utils/catchAsync');
 
 var AppError = require('./../utils/appError');
 
-var factory = require('./handlerFactory.js'); // FOR THE USER
+var factory = require('./handlerFactory.js');
+
+var sharp = require('sharp');
+
+var multer = require('multer'); // const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     // fname structure: user-id-timestamp.ext
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   }
+// });
+
+
+var multerStorage = multer.memoryStorage();
+
+var multerFilter = function multerFilter(req, file, cb) {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+var upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = function (req, res, next) {
+  if (!req.file) return next();
+  req.file.filename = "user-".concat(req.user.id, "-").concat(Date.now(), ".jpeg");
+  console.log('REQ BUFFER:', req.file.buffer);
+  sharp(req.file.buffer).resize(500, 500).toFormat('jpeg').jpeg({
+    quality: 90
+  }).toFile("public/img/users/".concat(req.file.filename));
+  next();
+}; // FOR THE USER
 
 
 var filterObj = function filterObj(obj) {
@@ -21,7 +61,8 @@ var filterObj = function filterObj(obj) {
     if (filter.includes(el)) filtered[el] = obj[el];
   });
   return filtered;
-};
+}; // create resizeUserPhoto handler
+
 
 exports.getMe = function (req, res, next) {
   req.params.id = req.user.id;
@@ -29,26 +70,31 @@ exports.getMe = function (req, res, next) {
 };
 
 exports.updateMe = catchAsync(function _callee(req, res, next) {
-  var user;
+  var filteredBody, user;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
+          console.log(req.body);
+          console.log(req.file); // Check if password is in the payload
+
           if (!(req.body.password || req.body.passwordConfirm)) {
-            _context.next = 2;
+            _context.next = 4;
             break;
           }
 
           return _context.abrupt("return", next(new AppError('The form contains your password, please try again!', 400)));
 
-        case 2:
-          _context.next = 4;
-          return regeneratorRuntime.awrap(User.findByIdAndUpdate(req.user.id, filterObj(req.body, 'name', 'email'), {
+        case 4:
+          filteredBody = filterObj(req.body, 'name', 'email');
+          if (req.file) filteredBody.photo = req.file.filename;
+          _context.next = 8;
+          return regeneratorRuntime.awrap(User.findByIdAndUpdate(req.user.id, filteredBody, {
             "new": true,
             runValidators: true
           }));
 
-        case 4:
+        case 8:
           user = _context.sent;
           console.log(user);
           res.status(200).json({
@@ -57,7 +103,7 @@ exports.updateMe = catchAsync(function _callee(req, res, next) {
             data: user
           });
 
-        case 7:
+        case 11:
         case "end":
           return _context.stop();
       }

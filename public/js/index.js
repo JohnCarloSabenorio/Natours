@@ -22,9 +22,14 @@ if (userForm) {
   userForm.addEventListener('submit', e => {
     e.preventDefault();
     console.log('Updating user data...');
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    updateSettings({ name, email }, 'data');
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+    console.log('FORM:', form);
+    // const name = document.getElementById('name').value;
+    // const email = document.getElementById('email').value;
+    updateSettings(form, 'data');
   });
 }
 if (passwordForm) {
