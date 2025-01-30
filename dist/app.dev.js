@@ -28,6 +28,8 @@ var reviewRouter = require('./routes/reviewRoutes');
 
 var viewRouter = require('./routes/viewRoutes');
 
+var bookingRouter = require('./routes/bookingRoutes');
+
 var globalErrorHandler = require('./controllers/errorController');
 
 var app = express(); // GLOBAL MIDDLEWARES
@@ -101,6 +103,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 app.all('*', function (req, res, next) {
   // Immediately assumes that there is an error, and will skip all middleware and send it directly to global error handling middleware
   next(new AppError("Cannot find ".concat(req.originalUrl, " on the server!"), 404));

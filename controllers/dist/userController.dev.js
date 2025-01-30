@@ -37,17 +37,33 @@ var upload = multer({
   fileFilter: multerFilter
 });
 exports.uploadUserPhoto = upload.single('photo');
+exports.resizeUserPhoto = catchAsync(function _callee(req, res, next) {
+  return regeneratorRuntime.async(function _callee$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          if (req.file) {
+            _context.next = 2;
+            break;
+          }
 
-exports.resizeUserPhoto = function (req, res, next) {
-  if (!req.file) return next();
-  req.file.filename = "user-".concat(req.user.id, "-").concat(Date.now(), ".jpeg");
-  console.log('REQ BUFFER:', req.file.buffer);
-  sharp(req.file.buffer).resize(500, 500).toFormat('jpeg').jpeg({
-    quality: 90
-  }).toFile("public/img/users/".concat(req.file.filename));
-  next();
-}; // FOR THE USER
+          return _context.abrupt("return", next());
 
+        case 2:
+          req.file.filename = "user-".concat(req.user.id, "-").concat(Date.now(), ".jpeg");
+          console.log('REQ BUFFER:', req.file.buffer);
+          sharp(req.file.buffer).resize(500, 500).toFormat('jpeg').jpeg({
+            quality: 90
+          }).toFile("public/img/users/".concat(req.file.filename));
+          next();
+
+        case 6:
+        case "end":
+          return _context.stop();
+      }
+    }
+  });
+}); // FOR THE USER
 
 var filterObj = function filterObj(obj) {
   for (var _len = arguments.length, filter = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -69,33 +85,33 @@ exports.getMe = function (req, res, next) {
   next();
 };
 
-exports.updateMe = catchAsync(function _callee(req, res, next) {
+exports.updateMe = catchAsync(function _callee2(req, res, next) {
   var filteredBody, user;
-  return regeneratorRuntime.async(function _callee$(_context) {
+  return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
-      switch (_context.prev = _context.next) {
+      switch (_context2.prev = _context2.next) {
         case 0:
           console.log(req.body);
           console.log(req.file); // Check if password is in the payload
 
           if (!(req.body.password || req.body.passwordConfirm)) {
-            _context.next = 4;
+            _context2.next = 4;
             break;
           }
 
-          return _context.abrupt("return", next(new AppError('The form contains your password, please try again!', 400)));
+          return _context2.abrupt("return", next(new AppError('The form contains your password, please try again!', 400)));
 
         case 4:
           filteredBody = filterObj(req.body, 'name', 'email');
           if (req.file) filteredBody.photo = req.file.filename;
-          _context.next = 8;
+          _context2.next = 8;
           return regeneratorRuntime.awrap(User.findByIdAndUpdate(req.user.id, filteredBody, {
             "new": true,
             runValidators: true
           }));
 
         case 8:
-          user = _context.sent;
+          user = _context2.sent;
           console.log(user);
           res.status(200).json({
             status: 'success',
@@ -105,18 +121,18 @@ exports.updateMe = catchAsync(function _callee(req, res, next) {
 
         case 11:
         case "end":
-          return _context.stop();
+          return _context2.stop();
       }
     }
   });
 });
 
-exports.deleteMe = function _callee2(req, res) {
-  return regeneratorRuntime.async(function _callee2$(_context2) {
+exports.deleteMe = function _callee3(req, res) {
+  return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
-      switch (_context2.prev = _context2.next) {
+      switch (_context3.prev = _context3.next) {
         case 0:
-          _context2.next = 2;
+          _context3.next = 2;
           return regeneratorRuntime.awrap(User.findByIdAndUpdate(req.user.id, {
             active: false
           }));
@@ -129,7 +145,7 @@ exports.deleteMe = function _callee2(req, res) {
 
         case 3:
         case "end":
-          return _context2.stop();
+          return _context3.stop();
       }
     }
   });
