@@ -11,6 +11,8 @@ var AppError = require('./../utils/appError');
 var _require = require('../models/reviewModel'),
     findByIdAndUpdate = _require.findByIdAndUpdate;
 
+var Booking = require('../models/bookingModel');
+
 exports.getBase = function (req, res, next) {
   res.status(200).render('base', {
     tour: 'The Forest Hiker'
@@ -90,6 +92,10 @@ exports.getAccount = function (req, res, next) {
   });
 };
 
+exports.getMyTours = function (req, res, next) {// 1. Find all bookings
+  // 2. Find tours with the returned IDs
+};
+
 exports.updateUserData = catchAsync(function _callee3(req, res, next) {
   var updatedUser;
   return regeneratorRuntime.async(function _callee3$(_context3) {
@@ -115,6 +121,44 @@ exports.updateUserData = catchAsync(function _callee3(req, res, next) {
         case 4:
         case "end":
           return _context3.stop();
+      }
+    }
+  });
+});
+exports.getMyTours = catchAsync(function _callee4(req, res, next) {
+  var bookings, tourIDs, tours;
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.next = 2;
+          return regeneratorRuntime.awrap(Booking.find({
+            user: req.user._id
+          }));
+
+        case 2:
+          bookings = _context4.sent;
+          // 2. Find tours with returned IDs
+          tourIDs = bookings.map(function (el) {
+            return el.tour;
+          });
+          _context4.next = 6;
+          return regeneratorRuntime.awrap(Tour.find({
+            _id: {
+              $in: tourIDs
+            }
+          }));
+
+        case 6:
+          tours = _context4.sent;
+          res.status(200).render('overview', {
+            title: 'My Tours',
+            tours: tours
+          });
+
+        case 8:
+        case "end":
+          return _context4.stop();
       }
     }
   });

@@ -2,13 +2,15 @@
 
 var stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-var catchAsync = require('./../utils/catchAsync.js');
+var catchAsync = require('../utils/catchAsync.js');
 
-var AppError = require('./../utils/appError.js');
+var AppError = require('../utils/appError.js');
 
 var handleFactory = require('./handlerFactory.js');
 
-var Tour = require('./../models/tourModel.js'); // create getCheckoutSession
+var Tour = require('../models/tourModel.js');
+
+var Booking = require('../models/bookingModel.js'); // create getCheckoutSession
 
 
 exports.getCheckoutSession = catchAsync(function _callee(req, res, next) {
@@ -30,9 +32,11 @@ exports.getCheckoutSession = catchAsync(function _callee(req, res, next) {
           _context.next = 9;
           return regeneratorRuntime.awrap(stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            success_url: "".concat(req.protocol, "://").concat(req.get('host'), "/"),
+            success_url: "".concat(req.protocol, "://").concat(req.get('host'), "/?tour=").concat(req.params.tourId, "&user=").concat(req.user.id, "&price=").concat(tour.price),
+            // NOT SECURE (JUST A WORKAROUND)
             cancel_url: "".concat(req.protocol, "://").concat(req.get('host'), "/tour/").concat(tour.slug),
-            customer_email: req.user.email,
+            customer_email: 'bluem@mailsac.com',
+            // req.user.email
             client_reference_id: req.params.tourId,
             mode: 'payment',
             line_items: [{
@@ -64,3 +68,43 @@ exports.getCheckoutSession = catchAsync(function _callee(req, res, next) {
     }
   });
 });
+exports.createBookingCheckout = catchAsync(function _callee2(req, res, next) {
+  var _req$query, tour, user, price;
+
+  return regeneratorRuntime.async(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          // This is only temporary because it is unsecured
+          _req$query = req.query, tour = _req$query.tour, user = _req$query.user, price = _req$query.price;
+
+          if (!(!tour && !user && !price)) {
+            _context2.next = 3;
+            break;
+          }
+
+          return _context2.abrupt("return", next());
+
+        case 3:
+          _context2.next = 5;
+          return regeneratorRuntime.awrap(Booking.create({
+            tour: tour,
+            user: user,
+            price: price
+          }));
+
+        case 5:
+          res.redirect(req.originalUrl.split('?')[0]);
+
+        case 6:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  });
+});
+exports.createBooking = handleFactory.createOne(Booking);
+exports.getBooking = handleFactory.getOne(Booking);
+exports.getAllBookings = handleFactory.getAll(Booking);
+exports.updateBooking = handleFactory.updateOne(Booking);
+exports.deleteBooking = handleFactory.deleteOne(Booking);

@@ -6,12 +6,15 @@ var _login = require("./login");
 
 var _updateSettings = require("./updateSettings");
 
+var _stripe = require("./stripe");
+
 // DOM ELEMENTS
 var loginForm = document.querySelector('.form--login');
 var logoutBtn = document.querySelector('.nav__el--logout');
 var userForm = document.querySelector('.form-user-data');
 var passwordForm = document.querySelector('.form-user-password');
-var savePasswordBtn = document.querySelector('.btn--save-password'); // VALUES
+var savePasswordBtn = document.querySelector('.btn--save-password');
+var bookBtn = document.getElementById('book-tour'); // VALUES
 // DELEGATION
 
 if (loginForm) {
@@ -75,4 +78,12 @@ if (passwordForm) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', _login.logout);
+}
+
+if (bookBtn) {
+  bookBtn.addEventListener('click', function (e) {
+    e.target.textContent = 'Processing...';
+    var tourId = e.target.dataset.tourId;
+    (0, _stripe.bookTour)(tourId);
+  });
 }
