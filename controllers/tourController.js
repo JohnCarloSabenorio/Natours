@@ -25,10 +25,7 @@ const upload = multer({
   fileFilter: multerFilter
 });
 
-exports.uploadTourImages = upload.fields([
-  { name: 'imageCover', maxCount: 1 },
-  { name: 'images', maxCount: 3 }
-]);
+exports.uploadTourImages = upload.fields([{ name: 'images', maxCount: 3 }]);
 
 exports.resizeTourImages = catchAsync(async (req, res, next) => {
   console.log('TOUR IAMGES');

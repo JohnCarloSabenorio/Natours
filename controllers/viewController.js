@@ -4,6 +4,8 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const { findByIdAndUpdate } = require('../models/reviewModel');
 const Booking = require('../models/bookingModel');
+
+
 exports.getBase = (req, res, next) => {
   res.status(200).render('base', {
     tour: 'The Forest Hiker'
@@ -43,11 +45,6 @@ exports.getAccount = (req, res, next) => {
   res.status(200).render('account', {
     title: 'My Account'
   });
-};
-
-exports.getMyTours = (req, res, next) => {
-  // 1. Find all bookings
-  // 2. Find tours with the returned IDs
 };
 
 exports.updateUserData = catchAsync(async (req, res, next) => {

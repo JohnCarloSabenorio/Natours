@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+
+// Needed for reading .env variables
 const dotenv = require('dotenv');
 
 // Catches synchronous errors

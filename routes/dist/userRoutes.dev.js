@@ -4,8 +4,7 @@ var express = require('express');
 
 var userController = require('./../controllers/userController');
 
-var authController = require('./../controllers/authController'); // Using multer() without any options will store in image in memory
-
+var authController = require('./../controllers/authController');
 
 var router = express.Router(); // ROUTES
 // Authentication route

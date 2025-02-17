@@ -92,10 +92,6 @@ exports.getAccount = function (req, res, next) {
   });
 };
 
-exports.getMyTours = function (req, res, next) {// 1. Find all bookings
-  // 2. Find tours with the returned IDs
-};
-
 exports.updateUserData = catchAsync(function _callee3(req, res, next) {
   var updatedUser;
   return regeneratorRuntime.async(function _callee3$(_context3) {

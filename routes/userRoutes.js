@@ -2,7 +2,6 @@ const express = require('express');
 const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authController');
 
-// Using multer() without any options will store in image in memory
 const router = express.Router();
 
 // ROUTES

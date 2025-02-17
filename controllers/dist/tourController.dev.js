@@ -42,9 +42,6 @@ var upload = multer({
   fileFilter: multerFilter
 });
 exports.uploadTourImages = upload.fields([{
-  name: 'imageCover',
-  maxCount: 1
-}, {
   name: 'images',
   maxCount: 3
 }]);
