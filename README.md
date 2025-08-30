@@ -1,7 +1,6 @@
 
 ---
 
-## 📄 README.md for **Natours**
 # Natours
 
 **Natours** is a comprehensive tour booking platform built on **Node.js and Express.js**. The system implements authentication, RESTful APIs, and follows the **MVC architecture** to ensure scalability and maintainability.
