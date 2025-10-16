@@ -5,7 +5,8 @@
 
 **Natours** is a comprehensive tour booking platform built on **Node.js and Express.js**. The system implements authentication, RESTful APIs, and follows the **MVC architecture** to ensure scalability and maintainability.
 
-It was designed as a practice project to understand full-stack development, secure authentication, and backend API structuring for real-world applications.
+It was designed as a practice project ([Node.js, Express, MongoDB & More: The Complete Bootcamp 2024](https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/?couponCode=2021PM25)
+) to understand full-stack development from the course, secure authentication, and backend API structuring for real-world applications.
 
 ---
 
